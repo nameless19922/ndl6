@@ -1,4 +1,4 @@
-const cwd = process.cwd();
+const cwd      = process.cwd();
 
 const express  = require('express');
 const path     = require('path');

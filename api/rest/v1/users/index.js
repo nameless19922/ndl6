@@ -1,4 +1,4 @@
-const cwd      = process.cwd();
+const cwd = process.cwd();
 
 const express  = require('express');
 const path     = require('path');
@@ -51,13 +51,9 @@ app.post('/', (req, res) => {
     if (errors.length) {
         handlers.error(res, 400, errors);
     } else {
-        let user = new User(
-            increment(),
-            req.body.name,
-            req.body.score
+        store.push(
+            new User(increment(), req.body.name, req.body.score)
         );
-
-        store.push(user);
 
         handlers.message(res, 1, 'user successfully created');
     }
@@ -86,7 +82,11 @@ app.put('/:id', (req, res) => {
                 handlers.message(res, 1, 'user successfully updated')
             }
         } else {
-            handlers.error(res, 400, [{ type: 'client error', message: `could not be find user ${req.params.id}`}]);
+            handlers.error(
+                res,
+                400,
+                [{ type: 'client error', message: `could not be find user ${req.params.id}`}]
+            );
         }
     }
 });
@@ -102,7 +102,11 @@ app.delete('/:id', (req, res) => {
         if (store.removeById(req.params.id)) {
             handlers.message(res, 1, 'user successfully removed');
         } else {
-            handlers.error(res, 400, [{ type: 'client error', message: `could not be find user ${req.params.id}`}]);
+            handlers.error(
+                res,
+                400,
+                [{ type: 'client error', message: `could not be find user ${req.params.id}`}]
+            );
         }
     }
 });

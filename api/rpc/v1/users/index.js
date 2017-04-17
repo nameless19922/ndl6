@@ -1,4 +1,4 @@
-const cwd      = process.cwd();
+const cwd = process.cwd();
 
 const express  = require('express');
 const path     = require('path');
@@ -39,17 +39,21 @@ const rpc = {
 
     createUser: (res, params, id) => {
         if (typeof params.name === 'string' && typeof params.score === 'number') {
-            let user = new User(
-                increment(),
-                params.name,
-                params.score
+            store.push(
+                new User(increment(), params.name, params.score)
             );
 
-            store.push(user);
-
-            handlers.response(res, {code: 1, message: 'user successfully created'}, id);
+            handlers.response(
+                res,
+                { code: 1, message: 'user successfully created' },
+                id
+            );
         } else {
-            handlers.error(res, { code: -32602, message: 'invalid method parameter(s).'}, id);
+            handlers.error(
+                res,
+                { code: -32602, message: 'invalid method parameter(s).' },
+                id
+            );
         }
     },
 
@@ -59,20 +63,40 @@ const rpc = {
         if (user) {
             if (typeof params.name === 'string' && typeof params.score === 'number') {
                 user.setUser(params.name, params.score);
-                handlers.response(res, {code: 1, message: 'user successfully updated'}, id);
+                handlers.response(
+                    res,
+                    { code: 1, message: 'user successfully updated' },
+                    id
+                );
             } else {
-                handlers.error(res, { code: -32602, message: 'invalid method parameter(s).'}, id);
+                handlers.error(
+                    res,
+                    { code: -32602, message: 'invalid method parameter(s).' },
+                    id
+                );
             }
         } else {
-            handlers.error(res, { code: -32600, message: `could not be find user`}, id);
+            handlers.error(
+                res,
+                { code: -32600, message: 'could not be find user' },
+                id
+            );
         }
     },
 
     deleteUser: (res, params, id) => {
         if (store.removeById(+params.id)) {
-            handlers.response(res, { code: 1, message: 'user successfully removed' }, id);
+            handlers.response(
+                res,
+                { code: 1, message: 'user successfully removed' },
+                id
+            );
         } else {
-            handlers.error(res, { code: -32600, message: `could not be find user ${params.id}`}, id);
+            handlers.error(
+                res,
+                { code: -32600, message: `could not be find user ${params.id}`},
+                id
+            );
         }
     },
 
@@ -81,7 +105,11 @@ const rpc = {
             store.removeAll();
         }
 
-        handlers.response(res, { code: 1, message: 'all users successfully removed' }, id);
+        handlers.response(
+            res,
+            { code: 1, message: 'all users successfully removed' },
+            id
+        );
     }
 }
 
@@ -91,12 +119,25 @@ app.post('/', (req, res) => {
     req.validateBody('id'     , true);
 
     const methods = ['getUsers', 'getUser', 'createUser', 'updateUser', 'deleteUser', 'deleteAllUsers'];
+    const method  = req.body.method;
 
     let errors = req.validationErrors();
 
     if (errors.length) {
-        handlers.error(res, { code: -32600, error: errors[0].message }, req.body.id);
+        handlers.error(
+            res,
+            { code: -32600, error: errors[0].message },
+            req.body.id
+        );
     } else {
-        rpc[req.body.method](res, req.body.params, req.body.id);
+        if (methods.indexOf(method) !== -1) {
+            rpc[req.body.method](res, req.body.params, req.body.id);
+        } else {
+            handlers.error(
+                res,
+                { code: -32601, error: 'The method does not exist / is not available.' },
+                req.body.id
+            );
+        }
     }
 });
